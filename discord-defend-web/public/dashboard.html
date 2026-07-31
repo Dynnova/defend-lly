@@ -436,6 +436,39 @@
 
 <div class="layout">
 
+  <!-- Bot Info -->
+  <div class="section" id="botInfoSection">
+    <div class="section-head">
+      <div>
+        <h3>Informasi Bot</h3>
+        <p>Server yang dipantau selfbot dan daftar file blacklisted.</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:12px;color:var(--muted)" id="lastUpdatedLabel">Memuat...</span>
+        <button class="btn-refresh" style="padding:6px 12px;font-size:12px" onclick="loadBotInfo()">↻ Refresh</button>
+      </div>
+    </div>
+    <div class="section-body">
+      <!-- Watch servers -->
+      <div style="margin-bottom:16px">
+        <div class="label-sm" style="margin-bottom:8px">Server yang Dipantau</div>
+        <div id="watchInfoList" style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:13px;color:var(--muted)">Memuat...</div>
+        </div>
+      </div>
+      <!-- Blacklist files -->
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div class="label-sm" style="margin:0">File Blacklisted (<span id="blCount">0</span>)</div>
+          <button class="btn-select-all" onclick="toggleBlacklist()" id="blToggleBtn">Tampilkan</button>
+        </div>
+        <div id="blList" style="display:none;max-height:240px;overflow-y:auto;display:none">
+          <div style="font-size:13px;color:var(--muted)">Memuat...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Refresh hint -->
   <div class="refresh-bar">
     <p><b>Segarkan server</b> - Tekan tombol ini untuk memuat channel terbaru dari server kamu sebelum konfigurasi.</p>
@@ -762,6 +795,89 @@
   function escHtml(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
+
+  // ─── Bot Info ─────────────────────────────────────────────────────────────
+  let blVisible  = false;
+  let blFilenames = [];
+
+  async function loadBotInfo() {
+    document.getElementById('lastUpdatedLabel').textContent = 'Memuat...';
+    try {
+      const res  = await fetch(`/api/bot-info?key=${key}`);
+      const data = await res.json();
+      if (!data.ok) return;
+
+      blFilenames = data.filenames ?? [];
+      document.getElementById('blCount').textContent = blFilenames.length;
+
+      // Last updated
+      if (data.lastUpdated) {
+        const d = new Date(data.lastUpdated);
+        document.getElementById('lastUpdatedLabel').textContent =
+          `Update: ${d.toLocaleDateString('id-ID')} ${d.toLocaleTimeString('id-ID')}`;
+      } else {
+        document.getElementById('lastUpdatedLabel').textContent = 'Belum pernah sync';
+      }
+
+      // Watch info
+      const watchEl = document.getElementById('watchInfoList');
+      const entries = Object.entries(data.watchInfo ?? {});
+      if (entries.length === 0) {
+        watchEl.innerHTML = '<div style="font-size:13px;color:var(--muted)">Tidak ada server yang dipantau.</div>';
+      } else {
+        watchEl.innerHTML = entries.map(([gid, info]) => `
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+            <span style="font-size:16px">🛡</span>
+            <div>
+              <div style="font-weight:600">${escHtml(info.guildName)}</div>
+              <div style="color:var(--muted);font-size:12px"># ${escHtml(info.channelName)}</div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Render blacklist kalau visible
+      if (blVisible) renderBlacklist();
+
+    } catch (err) {
+      document.getElementById('lastUpdatedLabel').textContent = 'Gagal memuat';
+    }
+  }
+
+  function renderBlacklist() {
+    const el = document.getElementById('blList');
+    if (!blFilenames.length) {
+      el.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0">Blacklist kosong.</div>';
+      return;
+    }
+    el.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:4px">
+        ${blFilenames.map(f => `
+          <div style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:monospace;color:#a8d4ff;background:#0f1621">
+            ${escHtml(f)}
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function toggleBlacklist() {
+    blVisible = !blVisible;
+    const el  = document.getElementById('blList');
+    const btn = document.getElementById('blToggleBtn');
+    if (blVisible) {
+      el.style.display = 'block';
+      btn.textContent  = 'Sembunyikan';
+      renderBlacklist();
+    } else {
+      el.style.display = 'none';
+      btn.textContent  = 'Tampilkan';
+    }
+  }
+
+  // Auto refresh bot info setiap 3 jam
+  loadBotInfo();
+  setInterval(() => loadBotInfo(), 3 * 60 * 60 * 1000);
 
   // Init
   renderChannels();
