@@ -115,6 +115,10 @@ export default async function handler(req) {
     missingPerms,
     channels,
     inviteUrl   : `https://discord.com/oauth2/authorize?client_id=${BOT_CLIENT_ID}&permissions=1099511696400&scope=bot`,
+        // debug
+    _botRoles   : botMember.roles,
+    _effectivePerms: effectivePerms.toString(),
+    _guildRoleIds: Object.keys(guildRoles),
   }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 }
 
