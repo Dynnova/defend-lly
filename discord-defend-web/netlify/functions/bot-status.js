@@ -14,32 +14,21 @@ const PERM_NAMES = {
   0x00000004n : 'Ban Members',
   0x00000008n : 'Administrator',
   0x00000400n : 'View Channels',
-  0x00002000n : 'Manage Channels',
-  0x00004000n : 'Manage Roles',
-  0x00008000n : 'Manage Emojis',
   0x00010000n : 'View Audit Log',
-  0x00020000n : 'View Guild Insights',
-  0x00040000n : 'Manage Webhooks',
-  0x00080000n : 'Manage Guild',
-  0x00000800n : 'Add Reactions',
-  0x00001000n : 'View Guild Insights',
-  0x00400000n : 'Mute Members',
-  0x01000000n : 'Manage Nicknames',
-  0x10000000n : 'Moderate Members', // timeout
-  0x00000040n : 'Read Message History',
   0x00000800n : 'Send Messages',
-  0x00002000n : 'Manage Messages',
+  0x10000000n : 'Moderate Members',
+  0x00000040n : 'Read Message History',
   0x00008000n : 'Attach Files',
 };
 
-function getMissingPerms(botPerms) {
+function getMissingPerms(effectivePerms) {
+  // Administrator override — semua permission granted
+  if (effectivePerms & 0x8n) return [];
+
   const missing = [];
-  const permsInt = BigInt(botPerms);
-  // Administrator override
-  if (permsInt & 0x00000008n) return [];
   for (const [bit, name] of Object.entries(PERM_NAMES)) {
     const bigBit = BigInt(bit);
-    if ((REQUIRED_PERMS & bigBit) === bigBit && !(permsInt & bigBit)) {
+    if ((REQUIRED_PERMS & bigBit) === bigBit && !(effectivePerms & bigBit)) {
       missing.push(name);
     }
   }
@@ -90,26 +79,33 @@ export default async function handler(req) {
     }
   } catch { /* lanjut tanpa role calc */ }
 
-  // Hitung effective permissions dari roles bot
+  // ─── Hitung effective permissions dari roles bot ──────────────────────────
   let effectivePerms = 0n;
-  for (const roleId of (botMember.roles ?? [])) {
-    const role = guildRoles[roleId];
-    if (role) effectivePerms |= BigInt(role.permissions);
-  }
-  // Tambah @everyone role
+
+  // Tambah @everyone role dulu
   const everyoneRole = guildRoles[guildId];
   if (everyoneRole) effectivePerms |= BigInt(everyoneRole.permissions);
 
-  const missingPerms = getMissingPerms(effectivePerms.toString());
+  // Loop semua role bot
+  for (const roleId of (botMember.roles ?? [])) {
+    const role = guildRoles[roleId];
+    if (role) {
+      const rolePerm = BigInt(role.permissions);
+      effectivePerms |= rolePerm;
+      // Kalau punya Administrator, langsung skip — semua permission granted
+      if (effectivePerms & 0x8n) break;
+    }
+  }
+
+  const missingPerms = getMissingPerms(effectivePerms);
 
   // ─── Ambil list channels ──────────────────────────────────────────────────
   let channels = [];
   try {
     const res  = await fetch(`${BASE}/guilds/${guildId}/channels`, { headers });
     const data = await res.json();
-    // Filter hanya text channel, sort by position
     channels = data
-      .filter(ch => ch.type === 0) // GUILD_TEXT
+      .filter(ch => ch.type === 0) // GUILD_TEXT only
       .sort((a, b) => a.position - b.position)
       .map(ch => ({ id: ch.id, name: ch.name, parentId: ch.parent_id }));
   } catch { /* channels kosong */ }
