@@ -414,6 +414,23 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .field-gap { margin-top: 16px; }
+
+    /* ─── Live dot ───────────────────────────────────────────────────────── */
+    .live-dot {
+      display      : inline-block;
+      width        : 8px;
+      height       : 8px;
+      border-radius: 50%;
+      background   : #4ade80;
+      box-shadow   : 0 0 6px #4ade80;
+      animation    : pulse-green 1.5s ease-in-out infinite;
+      flex-shrink  : 0;
+    }
+
+    @keyframes pulse-green {
+      0%, 100% { opacity: 1; box-shadow: 0 0 6px #4ade80; }
+      50%       { opacity: 0.3; box-shadow: 0 0 2px #4ade80; }
+    }
   </style>
 </head>
 <body>
@@ -443,9 +460,9 @@
         <h3>Informasi Bot</h3>
         <p>Server yang dipantau selfbot dan daftar file blacklisted.</p>
       </div>
-      <div style="display:flex;align-items:center;gap:10px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="live-dot"></span>
         <span style="font-size:12px;color:var(--muted)" id="lastUpdatedLabel">Memuat...</span>
-        <button class="btn-refresh" style="padding:6px 12px;font-size:12px" onclick="loadBotInfo()">↻ Refresh</button>
       </div>
     </div>
     <div class="section-body">
