@@ -348,7 +348,10 @@
             <p>Pastikan bot memiliki semua permission ini di server <b>${guildName}</b>:</p>
             ${tags}
           </div>
-          <a class="invite-btn" href="${bData.inviteUrl}" target="_blank" style="margin-top:14px;display:inline-block">Re-invite dengan Permission Lengkap</a>
+          <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+            <a class="invite-btn" href="${bData.inviteUrl}" target="_blank">Re-invite dengan Permission Lengkap</a>
+            <a class="invite-btn" href="https://discord.com/oauth2/authorize?client_id=1532396183098495147&permissions=8&scope=bot" target="_blank" style="background:#ed4245">Re-invite dengan Administrator</a>
+          </div>
         `);
         setLoading(false);
         return;
