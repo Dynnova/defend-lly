@@ -1,11 +1,12 @@
 /**
  * bot-status.js
  * Tujuan     : Netlify Function - cek bot ada di guild + validasi permissions + list channels
- * Dipakai    : Web dashboard via GET /api/bot-status?guildId=xxx
- * Dependensi : Discord REST API, env BOT_TOKEN, BOT_CLIENT_ID
- * Fungsi     : handler(req) - fetch guild member (bot), hitung missing perms, list channels
- * Side effect: Discord API read (guilds/{id}/members/{botId}, guilds/{id}/channels)
+ * Dipakai    : Web dashboard via GET /api/bot-status?guildId=xxx&key=xxx
+ * Dependensi : Discord REST API, @netlify/blobs, env BOT_TOKEN, BOT_CLIENT_ID
+ * Side effect: Discord API read, Netlify Blobs write (guild icon)
  */
+
+import { getStore } from '@netlify/blobs';
 
 const REQUIRED_PERMS = BigInt('1099511696400');
 
@@ -22,9 +23,7 @@ const PERM_NAMES = {
 };
 
 function getMissingPerms(effectivePerms) {
-  // Administrator override — semua permission granted
   if (effectivePerms & 0x8n) return [];
-
   const missing = [];
   for (const [bit, name] of Object.entries(PERM_NAMES)) {
     const bigBit = BigInt(bit);
@@ -35,6 +34,22 @@ function getMissingPerms(effectivePerms) {
   return [...new Set(missing)];
 }
 
+async function saveGuildIcon(guildName, guildId, iconHash, key) {
+  try {
+    const store      = getStore('defend');
+    const iconUrl    = iconHash
+      ? `https://cdn.discordapp.com/icons/${guildId}/${iconHash}.png?size=128`
+      : null;
+    const normalized = key?.trim().toUpperCase();
+    if (!normalized) return;
+    const keyData = await store.get(`key:${normalized}`, { type: 'json' });
+    if (!keyData) return;
+    keyData.guildIconUrl = iconUrl;
+    keyData.guildName    = guildName;
+    await store.setJSON(`key:${normalized}`, keyData);
+  } catch { /* skip */ }
+}
+
 export default async function handler(req) {
   if (req.method !== 'GET') {
     return new Response('Method not allowed', { status: 405 });
@@ -42,6 +57,7 @@ export default async function handler(req) {
 
   const url     = new URL(req.url);
   const guildId = url.searchParams.get('guildId');
+  const key     = url.searchParams.get('key') ?? null;
 
   if (!guildId) {
     return new Response(JSON.stringify({ error: 'guildId required' }), { status: 400 });
@@ -69,30 +85,30 @@ export default async function handler(req) {
     return new Response(JSON.stringify({ error: 'Discord API error' }), { status: 502 });
   }
 
-  // ─── Ambil guild info untuk hitung perms ─────────────────────────────────
+  // ─── Ambil guild info ─────────────────────────────────────────────────────
   let guildRoles = {};
+  let guildName  = '';
+  let iconHash   = null;
   try {
     const res   = await fetch(`${BASE}/guilds/${guildId}`, { headers });
     const guild = await res.json();
+    guildName   = guild.name ?? '';
+    iconHash    = guild.icon ?? null;
     for (const role of (guild.roles ?? [])) {
       guildRoles[role.id] = role;
     }
-  } catch { /* lanjut tanpa role calc */ }
+    // Simpan icon server ke Blobs kalau ada key
+    if (key) saveGuildIcon(guildName, guildId, iconHash, key);
+  } catch { /* lanjut */ }
 
-  // ─── Hitung effective permissions dari roles bot ──────────────────────────
+  // ─── Hitung effective permissions ─────────────────────────────────────────
   let effectivePerms = 0n;
-
-  // Tambah @everyone role dulu
   const everyoneRole = guildRoles[guildId];
   if (everyoneRole) effectivePerms |= BigInt(everyoneRole.permissions);
-
-  // Loop semua role bot
   for (const roleId of (botMember.roles ?? [])) {
     const role = guildRoles[roleId];
     if (role) {
-      const rolePerm = BigInt(role.permissions);
-      effectivePerms |= rolePerm;
-      // Kalau punya Administrator, langsung skip — semua permission granted
+      effectivePerms |= BigInt(role.permissions);
       if (effectivePerms & 0x8n) break;
     }
   }
@@ -105,7 +121,7 @@ export default async function handler(req) {
     const res  = await fetch(`${BASE}/guilds/${guildId}/channels`, { headers });
     const data = await res.json();
     channels = data
-      .filter(ch => ch.type === 0) // GUILD_TEXT only
+      .filter(ch => ch.type === 0)
       .sort((a, b) => a.position - b.position)
       .map(ch => ({ id: ch.id, name: ch.name, parentId: ch.parent_id }));
   } catch { /* channels kosong */ }
@@ -115,10 +131,6 @@ export default async function handler(req) {
     missingPerms,
     channels,
     inviteUrl   : `https://discord.com/oauth2/authorize?client_id=${BOT_CLIENT_ID}&permissions=1099511696400&scope=bot`,
-        // debug
-    _botRoles   : botMember.roles,
-    _effectivePerms: effectivePerms.toString(),
-    _guildRoleIds: Object.keys(guildRoles),
   }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 }
 
