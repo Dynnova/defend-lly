@@ -392,6 +392,41 @@
     .btn-save:hover:not(:disabled) { background: var(--accent-h); }
     .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
 
+    /* ─── Modal ──────────────────────────────────────────────────────────── */
+    .modal-overlay {
+      display        : none;
+      position       : fixed;
+      inset          : 0;
+      background     : rgba(0,0,0,0.7);
+      z-index        : 999;
+      align-items    : center;
+      justify-content: center;
+      padding        : 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background   : #16161a;
+      border       : 1px solid #2a2a30;
+      border-radius: 12px;
+      max-width    : 480px;
+      width        : 100%;
+      padding      : 28px;
+      animation    : modal-in 0.2s ease;
+    }
+    @keyframes modal-in {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; color: #faa61a; }
+    .modal-desc  { font-size: 13px; color: #a0a0b0; line-height: 1.6; margin-bottom: 16px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; align-items: center; }
+    .modal-check { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #6b6b78; margin-right: auto; cursor: pointer; }
+    .modal-check input { cursor: pointer; accent-color: var(--accent); }
+    .btn-cancel  { background: transparent; border: 1px solid #2a2a30; border-radius: 6px; color: #a0a0b0; font-size: 13px; padding: 8px 16px; cursor: pointer; }
+    .btn-cancel:hover { background: #1e1e24; }
+    .btn-confirm { background: var(--accent); border: none; border-radius: 6px; color: #fff; font-size: 13px; font-weight: 600; padding: 8px 18px; cursor: pointer; }
+    .btn-confirm:hover { background: var(--accent-h); }
+
     .label-sm {
       font-size  : 12px;
       color      : var(--muted);
@@ -441,10 +476,6 @@
     <div class="logo-icon">🛡</div>
     <div class="logo-text">DEFFEND</div>
     <div class="server-badge" id="serverBadge">...</div>
-  </div>
-  <div style="position:absolute;left:50%;transform:translateX(-50%);text-align:center;pointer-events:none">
-    <div style="font-size:11px;color:#3a3a46;font-style:italic">"Even as the owner of a bad server, we shouldn't do that shit just to increase members."</div>
-    <div style="font-size:10px;color:#2e2e3a;letter-spacing:0.05em;margin-top:2px">— made by dynnova</div>
   </div>
   <div class="topbar-right">
     <div class="user-chip">
@@ -601,6 +632,59 @@
     </div>
   </div>
 
+</div>
+
+<!-- Modal Role Hierarchy -->
+<div class="modal-overlay" id="roleModal">
+  <div class="modal-box">
+    <div class="modal-title">⚠️ Pastikan Role Bot di Posisi yang Benar</div>
+    <div class="modal-desc">
+      Agar bot bisa melakukan <b>timeout, kick, dan ban</b>, role bot harus berada <b>di atas</b> role member di server kamu.
+      <br><br>
+      Pergi ke <b>Server Settings → Roles</b>, lalu drag role <b>LIPSYNN</b> ke atas role member/NSFW.
+    </div>
+
+    <!-- Ilustrasi SVG -->
+    <svg viewBox="0 0 420 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:8px;margin-bottom:4px">
+      <rect width="420" height="200" fill="#0d0d0f" rx="8"/>
+
+      <!-- Label -->
+      <text x="16" y="22" fill="#6b6b78" font-size="11" font-family="system-ui">Server Settings / Roles</text>
+      <line x1="0" y1="30" x2="420" y2="30" stroke="#2a2a30" stroke-width="1"/>
+
+      <!-- Role LIPSYNN (bot) - highlighted -->
+      <rect x="12" y="38" width="396" height="36" rx="6" fill="#1a1f35" stroke="#5865f2" stroke-width="1.5"/>
+      <circle cx="34" cy="56" r="10" fill="#5865f2"/>
+      <text x="34" y="60" fill="#fff" font-size="10" text-anchor="middle" font-family="system-ui">🤖</text>
+      <text x="52" y="53" fill="#ffffff" font-size="13" font-weight="600" font-family="system-ui">LIPSYNN</text>
+      <text x="52" y="68" fill="#5865f2" font-size="10" font-family="system-ui">Bot — harus di sini ✓</text>
+      <text x="370" y="60" fill="#4ade80" font-size="18" text-anchor="middle">↑</text>
+
+      <!-- Divider arrow -->
+      <text x="210" y="92" fill="#faa61a" font-size="11" text-anchor="middle" font-family="system-ui">▼ role member di bawah ini</text>
+
+      <!-- Role Member -->
+      <rect x="12" y="100" width="396" height="32" rx="6" fill="#16161a" stroke="#2a2a30" stroke-width="1"/>
+      <circle cx="34" cy="116" r="10" fill="#3ba55d" opacity="0.7"/>
+      <text x="52" y="121" fill="#a0a0b0" font-size="13" font-family="system-ui">Member</text>
+
+      <!-- Role NSFW -->
+      <rect x="12" y="138" width="396" height="32" rx="6" fill="#16161a" stroke="#2a2a30" stroke-width="1"/>
+      <circle cx="34" cy="154" r="10" fill="#ed4245" opacity="0.7"/>
+      <text x="52" y="159" fill="#a0a0b0" font-size="13" font-family="system-ui">NSFW / Bronze / dst...</text>
+
+      <!-- Wrong example -->
+      <text x="210" y="192" fill="#ed4245" font-size="10" text-anchor="middle" font-family="system-ui">❌ Jangan taruh LIPSYNN di bawah role member</text>
+    </svg>
+
+    <div class="modal-actions">
+      <label class="modal-check">
+        <input type="checkbox" id="dontShowAgain"> Jangan tampilkan lagi
+      </label>
+      <button class="btn-cancel" onclick="closeModal()">Batal</button>
+      <button class="btn-confirm" onclick="confirmSave()">Sudah, Simpan</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -764,14 +848,44 @@
     }
   }
 
-  // ─── Save config ──────────────────────────────────────────────────────────
-  async function saveConfig() {
+  // ─── Modal role hierarchy ─────────────────────────────────────────────────
+  const MODAL_KEY = `defend_skip_modal_${guildId}`;
+
+  function saveConfig() {
+    const skip = localStorage.getItem(MODAL_KEY) === 'true';
+    if (skip) {
+      doSaveConfig();
+    } else {
+      document.getElementById('dontShowAgain').checked = false;
+      document.getElementById('roleModal').classList.add('open');
+    }
+  }
+
+  function closeModal() {
+    document.getElementById('roleModal').classList.remove('open');
+  }
+
+  function confirmSave() {
+    if (document.getElementById('dontShowAgain').checked) {
+      localStorage.setItem(MODAL_KEY, 'true');
+    }
+    closeModal();
+    doSaveConfig();
+  }
+
+  // Tutup modal kalau klik overlay
+  document.getElementById('roleModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // ─── Actual save ──────────────────────────────────────────────────────────
+  async function doSaveConfig() {
     const btn    = document.getElementById('saveBtn');
     const status = document.getElementById('saveStatus');
 
-    btn.disabled    = true;
-    btn.innerHTML   = '<span class="loader"></span>Menyimpan...';
-    status.className = 'save-status';
+    btn.disabled       = true;
+    btn.innerHTML      = '<span class="loader"></span>Menyimpan...';
+    status.className   = 'save-status';
     status.textContent = '';
 
     const payload = {
