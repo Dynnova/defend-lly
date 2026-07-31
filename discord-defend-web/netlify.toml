@@ -1,9 +1,3 @@
-[build]
-  publish = "discord-defend-web/public"
-
-[functions]
-  directory = "discord-defend-web/netlify/functions"
-
 [[headers]]
   for = "/*"
   [headers.values]
