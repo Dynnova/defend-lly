@@ -8,7 +8,7 @@
 
 import { getStore } from '@netlify/blobs';
 
-const REQUIRED_PERMS = BigInt('1099511696400');
+const REQUIRED_PERMS = BigInt('1099511704582');
 
 const PERM_NAMES = {
   0x00000002n : 'Kick Members',
@@ -75,7 +75,7 @@ export default async function handler(req) {
     if (res.status === 404) {
       return new Response(JSON.stringify({
         inGuild     : false,
-        inviteUrl   : `https://discord.com/oauth2/authorize?client_id=${BOT_CLIENT_ID}&permissions=1099511696400&scope=bot`,
+        inviteUrl   : `https://discord.com/oauth2/authorize?client_id=${BOT_CLIENT_ID}&permissions=1099511704582&scope=bot`,
         missingPerms: [],
         channels    : [],
       }), { status: 200, headers: { 'Content-Type': 'application/json' } });
@@ -130,7 +130,7 @@ export default async function handler(req) {
     inGuild     : true,
     missingPerms,
     channels,
-    inviteUrl   : `https://discord.com/oauth2/authorize?client_id=${BOT_CLIENT_ID}&permissions=1099511696400&scope=bot`,
+    inviteUrl   : `https://discord.com/oauth2/authorize?client_id=${BOT_CLIENT_ID}&permissions=1099511704582&scope=bot`,
   }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 }
 
