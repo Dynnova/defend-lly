@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DEFFEND - Blacklist Enforcer</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg       : #0d0d0f;
+      --surface  : #16161a;
+      --border   : #2a2a30;
+      --text      : #e8e8ec;
+      --muted    : #6b6b78;
+      --accent   : #5865f2;
+      --accent-h : #4752c4;
+      --ok       : #3ba55d;
+      --warn     : #faa61a;
+      --danger   : #ed4245;
+      --radius   : 8px;
+      --mono     : 'Courier New', monospace;
+    }
+
+    body {
+      background : var(--bg);
+      color      : var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      min-height : 100vh;
+      display    : flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding    : 24px;
+    }
+
+    .card {
+      background : var(--surface);
+      border     : 1px solid var(--border);
+      border-radius: var(--radius);
+      padding    : 36px;
+      width      : 100%;
+      max-width  : 480px;
+    }
+
+    .logo {
+      display    : flex;
+      align-items: center;
+      gap        : 10px;
+      margin-bottom: 28px;
+    }
+
+    .logo-icon {
+      width : 36px;
+      height: 36px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .logo-text {
+      font-size  : 20px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .logo-text span { color: var(--muted); font-weight: 400; }
+
+    h2 {
+      font-size  : 15px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    p.desc {
+      font-size : 13px;
+      color     : var(--muted);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .input-wrap { position: relative; margin-bottom: 12px; }
+
+    input[type="text"] {
+      width      : 100%;
+      background : var(--bg);
+      border     : 1px solid var(--border);
+      border-radius: var(--radius);
+      color      : var(--text);
+      font-family: var(--mono);
+      font-size  : 14px;
+      padding    : 11px 14px;
+      outline    : none;
+      transition : border-color 0.15s;
+      letter-spacing: 0.05em;
+    }
+
+    input[type="text"]::placeholder { color: var(--muted); }
+    input[type="text"]:focus { border-color: var(--accent); }
+
+    button.primary {
+      width      : 100%;
+      background : var(--accent);
+      border     : none;
+      border-radius: var(--radius);
+      color      : #fff;
+      font-size  : 14px;
+      font-weight: 600;
+      padding    : 11px;
+      cursor     : pointer;
+      transition : background 0.15s;
+    }
+
+    button.primary:hover:not(:disabled) { background: var(--accent-h); }
+    button.primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .status-box {
+      margin-top : 20px;
+      border-radius: var(--radius);
+      padding    : 14px 16px;
+      font-size  : 13px;
+      line-height: 1.6;
+      display    : none;
+    }
+
+    .status-box.error { background: #2a1215; border: 1px solid #5c1c1e; color: #f87171; }
+    .status-box.warn  { background: #261e10; border: 1px solid #5c4010; color: var(--warn); }
+    .status-box.ok    { background: #0e2318; border: 1px solid #1a4a30; color: #4ade80; }
+
+    .user-row {
+      display    : flex;
+      align-items: center;
+      gap        : 12px;
+      padding    : 12px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .user-row img {
+      width        : 40px;
+      height       : 40px;
+      border-radius: 50%;
+      object-fit   : cover;
+    }
+
+    .user-info { font-size: 13px; }
+    .user-info b { display: block; font-size: 14px; }
+    .user-info span { color: var(--muted); }
+
+    .perm-missing {
+      margin-top : 12px;
+    }
+
+    .perm-missing p { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+
+    .perm-tag {
+      display    : inline-block;
+      background : #2a1215;
+      border     : 1px solid #5c1c1e;
+      color      : #f87171;
+      font-size  : 11px;
+      padding    : 2px 8px;
+      border-radius: 4px;
+      margin     : 2px;
+    }
+
+    .invite-btn {
+      display    : inline-block;
+      margin-top : 12px;
+      background : var(--accent);
+      color      : #fff;
+      font-size  : 13px;
+      font-weight: 600;
+      padding    : 8px 16px;
+      border-radius: var(--radius);
+      text-decoration: none;
+      transition : background 0.15s;
+    }
+
+    .invite-btn:hover { background: var(--accent-h); }
+
+    .divider {
+      border    : none;
+      border-top: 1px solid var(--border);
+      margin    : 20px 0;
+    }
+
+    .hint-box {
+      background : #0f1621;
+      border     : 1px solid #1e3050;
+      border-radius: var(--radius);
+      padding    : 12px 14px;
+      font-size  : 13px;
+      color      : #7eb8f7;
+      line-height: 1.6;
+    }
+
+    .hint-box b { display: block; margin-bottom: 4px; color: #a8d4ff; }
+
+    .step-num {
+      display    : inline-flex;
+      width      : 20px;
+      height     : 20px;
+      background : var(--accent);
+      border-radius: 50%;
+      font-size  : 11px;
+      font-weight: 700;
+      align-items: center;
+      justify-content: center;
+      margin-right: 6px;
+      flex-shrink: 0;
+      vertical-align: middle;
+    }
+
+    .loader {
+      display    : inline-block;
+      width      : 14px;
+      height     : 14px;
+      border     : 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation  : spin 0.6s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    footer {
+      margin-top: 28px;
+      font-size : 12px;
+      color     : var(--muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">🛡</div>
+    <div class="logo-text">DEFFEND <span>/ access</span></div>
+  </div>
+
+  <h2>Masukkan Access Key</h2>
+  <p class="desc">Key diberikan oleh owner. Format: <code style="color:var(--accent);font-family:var(--mono)">DEFFEND-XXX-XXX-XXX-SR</code></p>
+
+  <div class="input-wrap">
+    <input type="text" id="keyInput" placeholder="DEFFEND-XXX-XXX-XXX-SR" autocomplete="off" spellcheck="false" />
+  </div>
+  <button class="primary" id="validateBtn" onclick="validateKey()">Verifikasi Key</button>
+
+  <div class="status-box" id="statusBox"></div>
+</div>
+
+<footer>DEFFEND - Blacklist Enforcer &copy; 2025</footer>
+
+<script>
+  const $ = id => document.getElementById(id);
+
+  // Auto-format input uppercase
+  $('keyInput').addEventListener('input', function() {
+    const pos = this.selectionStart;
+    this.value = this.value.toUpperCase();
+    this.setSelectionRange(pos, pos);
+  });
+
+  $('keyInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') validateKey();
+  });
+
+  function showStatus(type, html) {
+    const box = $('statusBox');
+    box.className = `status-box ${type}`;
+    box.innerHTML = html;
+    box.style.display = 'block';
+  }
+
+  function setLoading(on) {
+    const btn = $('validateBtn');
+    btn.disabled = on;
+    btn.innerHTML = on
+      ? '<span class="loader"></span>Memverifikasi...'
+      : 'Verifikasi Key';
+  }
+
+  async function validateKey() {
+    const key = $('keyInput').value.trim();
+    if (!key) return;
+
+    setLoading(true);
+    $('statusBox').style.display = 'none';
+
+    try {
+      // 1. Validasi key
+      const vRes  = await fetch('/api/validate-key', {
+        method : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify({ key }),
+      });
+      const vData = await vRes.json();
+
+      if (!vRes.ok || !vData.ok) {
+        showStatus('error', vData.error ?? 'Key tidak valid.');
+        setLoading(false);
+        return;
+      }
+
+      const { guildId, guildName, username, pfpUrl, displayName } = vData;
+
+      // 2. Cek status bot di guild
+      const bRes  = await fetch(`/api/bot-status?guildId=${guildId}`);
+      const bData = await bRes.json();
+
+      if (!bData.inGuild) {
+        showStatus('warn', `
+          <div class="user-row">
+            <img src="${pfpUrl}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'" />
+            <div class="user-info">
+              <b>${displayName ?? username}</b>
+              <span>Server: ${guildName}</span>
+            </div>
+          </div>
+          <b>Bot belum ada di server kamu.</b><br>
+          Invite bot ke server <b>${guildName}</b> terlebih dahulu, lalu kembali ke halaman ini.
+          <br>
+          <a class="invite-btn" href="${bData.inviteUrl}" target="_blank">Invite Bot ke Server</a>
+        `);
+        setLoading(false);
+        return;
+      }
+
+      if (bData.missingPerms && bData.missingPerms.length > 0) {
+        const tags = bData.missingPerms.map(p => `<span class="perm-tag">${p}</span>`).join('');
+        showStatus('warn', `
+          <div class="user-row">
+            <img src="${pfpUrl}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'" />
+            <div class="user-info">
+              <b>${displayName ?? username}</b>
+              <span>Server: ${guildName}</span>
+            </div>
+          </div>
+          <b>Bot kekurangan permission berikut:</b>
+          <div class="perm-missing">
+            <p>Pastikan bot memiliki semua permission ini di server <b>${guildName}</b>:</p>
+            ${tags}
+          </div>
+          <a class="invite-btn" href="${bData.inviteUrl}" target="_blank" style="margin-top:14px;display:inline-block">Re-invite dengan Permission Lengkap</a>
+        `);
+        setLoading(false);
+        return;
+      }
+
+      // ─── Semua OK, tampil hint lalu redirect ke dashboard ─────────────────
+      showStatus('ok', `
+        <div class="user-row">
+          <img src="${pfpUrl}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'" />
+          <div class="user-info">
+            <b>${displayName ?? username}</b>
+            <span>Server: ${guildName} &nbsp;|&nbsp; Akses terverifikasi</span>
+          </div>
+        </div>
+        <hr class="divider" />
+        <div class="hint-box">
+          <b>Sebelum konfigurasi, lakukan scan dulu</b>
+          Di dashboard nanti, tekan tombol <b>"Segarkan"</b> untuk memuat semua channel server kamu. Ini perlu dilakukan sekali sebelum bisa memilih channel yang ingin dilindungi.
+        </div>
+      `);
+
+      // Simpan session sederhana di sessionStorage
+      sessionStorage.setItem('defend_key', key);
+      sessionStorage.setItem('defend_guild', guildId);
+      sessionStorage.setItem('defend_guild_name', guildName);
+      sessionStorage.setItem('defend_channels', JSON.stringify(bData.channels ?? []));
+      sessionStorage.setItem('defend_pfp', pfpUrl);
+      sessionStorage.setItem('defend_user', displayName ?? username);
+
+      setTimeout(() => {
+        window.location.href = '/dashboard.html';
+      }, 2800);
+
+    } catch (err) {
+      showStatus('error', `Terjadi kesalahan: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+</script>
+</body>
+</html>
