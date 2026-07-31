@@ -1,8 +1,8 @@
 [build]
-  publish = "public"
+  publish = "discord-defend-web/public"
 
 [functions]
-  directory = "netlify/functions"
+  directory = "discord-defend-web/netlify/functions"
 
 [[headers]]
   for = "/*"
