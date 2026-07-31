@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LIPSYNN - Dashboard</title>
+  <title>DEFFEND - Dashboard</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -431,107 +431,6 @@
       0%, 100% { opacity: 1; box-shadow: 0 0 6px #4ade80; }
       50%       { opacity: 0.3; box-shadow: 0 0 2px #4ade80; }
     }
-
-    /* ─── Modal ──────────────────────────────────────────────────────────── */
-    .modal-overlay {
-      display        : none;
-      position       : fixed;
-      inset          : 0;
-      background     : rgba(0,0,0,0.65);
-      z-index        : 100;
-      align-items    : center;
-      justify-content: center;
-      padding        : 20px;
-      backdrop-filter: blur(2px);
-    }
-    .modal-overlay.open { display: flex; }
-
-    .modal-box {
-      background   : var(--surface);
-      border       : 1px solid var(--border);
-      border-radius: 12px;
-      width        : 100%;
-      max-width    : 500px;
-      overflow     : hidden;
-      animation    : modalIn 0.18s ease;
-    }
-
-    @keyframes modalIn {
-      from { opacity: 0; transform: scale(0.95) translateY(8px); }
-      to   { opacity: 1; transform: scale(1) translateY(0); }
-    }
-
-    .modal-head {
-      padding      : 16px 20px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .modal-head h3 { font-size: 15px; font-weight: 700; }
-    .modal-head p  { font-size: 12px; color: var(--muted); margin-top: 3px; }
-
-    .modal-body { padding: 20px; }
-
-    .modal-svg-wrap {
-      background   : #0a0a0e;
-      border       : 1px solid var(--border);
-      border-radius: 8px;
-      padding      : 16px;
-      margin-bottom: 16px;
-      text-align   : center;
-    }
-
-    .modal-desc {
-      font-size  : 13px;
-      color      : var(--text);
-      line-height: 1.65;
-      margin-bottom: 14px;
-    }
-
-    .modal-desc b { color: #a8d4ff; }
-
-    .modal-check-row {
-      display    : flex;
-      align-items: center;
-      gap        : 8px;
-      font-size  : 13px;
-      color      : var(--muted);
-      margin-bottom: 18px;
-      cursor     : pointer;
-      user-select: none;
-    }
-
-    .modal-check-row input { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
-
-    .modal-footer {
-      display        : flex;
-      justify-content: flex-end;
-      gap            : 10px;
-    }
-
-    .btn-modal-cancel {
-      background   : transparent;
-      border       : 1px solid var(--border);
-      color        : var(--muted);
-      font-size    : 13px;
-      padding      : 8px 18px;
-      border-radius: var(--radius);
-      cursor       : pointer;
-      transition   : all 0.15s;
-    }
-    .btn-modal-cancel:hover { border-color: var(--danger); color: var(--danger); }
-
-    .btn-modal-confirm {
-      background   : var(--accent);
-      border       : none;
-      border-radius: var(--radius);
-      color        : #fff;
-      font-size    : 13px;
-      font-weight  : 600;
-      padding      : 8px 20px;
-      cursor       : pointer;
-      transition   : background 0.15s;
-    }
-    .btn-modal-confirm:hover { background: var(--accent-h); }
   </style>
 </head>
 <body>
@@ -540,7 +439,7 @@
 <div class="topbar">
   <div class="topbar-left">
     <div class="logo-icon">🛡</div>
-    <div class="logo-text">LIPSYNN</div>
+    <div class="logo-text">DEFFEND</div>
     <div class="server-badge" id="serverBadge">...</div>
   </div>
   <div class="topbar-right">
@@ -698,83 +597,12 @@
     </div>
   </div>
 
-  <!-- Role Warning Modal -->
-  <div class="modal-overlay" id="roleModal">
-    <div class="modal-box">
-      <div class="modal-head">
-        <h3>⚠️ Sebelum Menyimpan Konfigurasi</h3>
-        <p>Pastikan posisi role bot sudah benar di server kamu</p>
-      </div>
-      <div class="modal-body">
-        <div class="modal-svg-wrap">
-          <!-- SVG Role Hierarchy Illustration -->
-          <svg viewBox="0 0 380 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:360px">
-            <!-- Title -->
-            <text x="190" y="18" text-anchor="middle" font-size="11" fill="#6b6b78" font-family="system-ui,sans-serif">Server Settings → Roles</text>
-
-            <!-- Role rows -->
-            <!-- Admin (top, grey) -->
-            <rect x="20" y="30" width="340" height="34" rx="6" fill="#1c1c22" stroke="#2a2a30" stroke-width="1"/>
-            <circle cx="44" cy="47" r="9" fill="#faa61a"/>
-            <text x="44" y="51" text-anchor="middle" font-size="9" fill="#fff" font-family="system-ui,sans-serif">★</text>
-            <text x="62" y="44" font-size="12" fill="#e8e8ec" font-family="system-ui,sans-serif" font-weight="600">Admin</text>
-            <text x="62" y="57" font-size="10" fill="#6b6b78" font-family="system-ui,sans-serif">Punya semua permission</text>
-            <text x="350" y="51" text-anchor="end" font-size="10" fill="#6b6b78" font-family="system-ui,sans-serif">⠿</text>
-
-            <!-- LIPSYNN bot (highlighted) -->
-            <rect x="20" y="72" width="340" height="34" rx="6" fill="#0e1a2e" stroke="#5865f2" stroke-width="1.5"/>
-            <!-- Glow effect -->
-            <rect x="20" y="72" width="4" height="34" rx="2" fill="#5865f2"/>
-            <circle cx="44" cy="89" r="9" fill="#5865f2"/>
-            <text x="44" y="93" text-anchor="middle" font-size="9" fill="#fff" font-family="system-ui,sans-serif">🛡</text>
-            <text x="62" y="86" font-size="12" fill="#a8d4ff" font-family="system-ui,sans-serif" font-weight="700">LIPSYNN</text>
-            <text x="62" y="99" font-size="10" fill="#5865f2" font-family="system-ui,sans-serif">← Harus di atas role member!</text>
-            <rect x="295" y="79" width="58" height="20" rx="4" fill="#0e2318" stroke="#1a4a30"/>
-            <text x="324" y="93" text-anchor="middle" font-size="10" fill="#4ade80" font-family="system-ui,sans-serif" font-weight="600">✓ Posisi OK</text>
-
-            <!-- Arrow between LIPSYNN and Member -->
-            <line x1="190" y1="108" x2="190" y2="126" stroke="#ed4245" stroke-width="1.5" stroke-dasharray="3,2"/>
-            <polygon points="186,124 194,124 190,130" fill="#ed4245"/>
-
-            <!-- Member (below) -->
-            <rect x="20" y="132" width="340" height="34" rx="6" fill="#1c1c22" stroke="#2a2a30" stroke-width="1"/>
-            <circle cx="44" cy="149" r="9" fill="#3ba55d"/>
-            <text x="44" y="153" text-anchor="middle" font-size="9" fill="#fff" font-family="system-ui,sans-serif">M</text>
-            <text x="62" y="146" font-size="12" fill="#e8e8ec" font-family="system-ui,sans-serif" font-weight="600">Member / NSFW</text>
-            <text x="62" y="159" font-size="10" fill="#6b6b78" font-family="system-ui,sans-serif">Role member biasa</text>
-            <text x="350" y="153" text-anchor="end" font-size="10" fill="#6b6b78" font-family="system-ui,sans-serif">⠿</text>
-
-            <!-- Bottom label -->
-            <text x="190" y="192" text-anchor="middle" font-size="10" fill="#6b6b78" font-family="system-ui,sans-serif">Drag &amp; drop role untuk mengubah urutan</text>
-          </svg>
-        </div>
-
-        <div class="modal-desc">
-          Role bot <b>LIPSYNN</b> harus berada <b>di atas</b> role Member/NSFW di hierarki role server kamu.<br>
-          Tanpa ini, bot <b>tidak bisa</b> melakukan timeout, kick, atau ban terhadap member.
-          <br><br>
-          Cara setting: <b>Server Settings → Roles → drag LIPSYNN ke atas role Member</b>
-        </div>
-
-        <label class="modal-check-row">
-          <input type="checkbox" id="dontShowAgainCheck" />
-          Jangan tampilkan lagi untuk server ini
-        </label>
-
-        <div class="modal-footer">
-          <button class="btn-modal-cancel" onclick="closeRoleModal()">Batal</button>
-          <button class="btn-modal-confirm" onclick="confirmSaveConfig()">Sudah, Simpan</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Server Pengguna LIPSYNN -->
+  <!-- Server Pengguna DEFFEND -->
   <div class="section" id="partnerSection">
     <div class="section-head">
       <div>
-        <h3>Server Pengguna LIPSYNN</h3>
-        <p>Daftar server yang menggunakan LIPSYNN.</p>
+        <h3>Server Pengguna DEFFEND</h3>
+        <p>Daftar server yang menggunakan DEFFEND.</p>
       </div>
       <span style="font-size:12px;color:var(--muted)" id="partnerCount"></span>
     </div>
@@ -935,6 +763,10 @@
       if (data.channels?.length) {
         channels = data.channels;
         sessionStorage.setItem('defend_channels', JSON.stringify(channels));
+        if (data.guildName) {
+          sessionStorage.setItem('defend_guild_name', data.guildName);
+          document.getElementById('serverBadge').textContent = data.guildName;
+        }
         renderChannels();
         btn.textContent = 'Berhasil dimuat';
         setTimeout(() => { btn.textContent = 'Segarkan'; btn.disabled = false; }, 2000);
@@ -949,39 +781,7 @@
   }
 
   // ─── Save config ──────────────────────────────────────────────────────────
-  function saveConfig() {
-    const skipKey = `defend_skip_role_warn_${guildId}`;
-    const skip    = localStorage.getItem(skipKey) === '1';
-
-    if (skip) {
-      // langsung simpan tanpa modal
-      doSaveConfig();
-    } else {
-      // tampilkan modal dulu
-      document.getElementById('dontShowAgainCheck').checked = false;
-      document.getElementById('roleModal').classList.add('open');
-    }
-  }
-
-  function closeRoleModal() {
-    document.getElementById('roleModal').classList.remove('open');
-  }
-
-  function confirmSaveConfig() {
-    const skipKey = `defend_skip_role_warn_${guildId}`;
-    if (document.getElementById('dontShowAgainCheck').checked) {
-      localStorage.setItem(skipKey, '1');
-    }
-    closeRoleModal();
-    doSaveConfig();
-  }
-
-  // Tutup modal kalau klik overlay di luar box
-  document.getElementById('roleModal').addEventListener('click', function(e) {
-    if (e.target === this) closeRoleModal();
-  });
-
-  async function doSaveConfig() {
+  async function saveConfig() {
     const btn    = document.getElementById('saveBtn');
     const status = document.getElementById('saveStatus');
 
