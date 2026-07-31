@@ -75,7 +75,7 @@ export default async function handler(req) {
     if (res.status === 404) {
       return new Response(JSON.stringify({
         inGuild     : false,
-        inviteUrl   : `https://discord.com/oauth2/authorize?client_id=${BOT_CLIENT_ID}&permissions=1099511704582&scope=bot`,
+        inviteUrl   : `https://discord.com/oauth2/authorize?client_id=${BOT_CLIENT_ID}&permissions=1099511704582&scope=bot%20applications.commands`,
         missingPerms: [],
         channels    : [],
       }), { status: 200, headers: { 'Content-Type': 'application/json' } });
@@ -128,9 +128,10 @@ export default async function handler(req) {
 
   return new Response(JSON.stringify({
     inGuild     : true,
+    guildName,
     missingPerms,
     channels,
-    inviteUrl   : `https://discord.com/oauth2/authorize?client_id=${BOT_CLIENT_ID}&permissions=1099511704582&scope=bot`,
+    inviteUrl   : `https://discord.com/oauth2/authorize?client_id=${BOT_CLIENT_ID}&permissions=1099511704582&scope=bot%20applications.commands`,
   }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 }
 
